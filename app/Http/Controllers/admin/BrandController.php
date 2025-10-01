@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BrandController extends Controller
 {
@@ -30,7 +31,20 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        Brand::create($request->all());
+        // Brand::create($request->all());
+        $logo = "";
+        $request->validate([
+            "name" => "unique:brands"
+        ]);
+        if ($request->logo != "") {
+            $image = $request->file("logo")->store("public/brand_logo");
+            $logo = Storage::url($image);
+        }
+        Brand::create([
+            "name" => $request->name,
+            "logo" => $logo,
+            "description" => $request->description
+        ]);
         return redirect()->route('admin.brands.index')->with('action', 'Marca registrada');
     }
 
@@ -57,7 +71,25 @@ class BrandController extends Controller
     public function update(Request $request, string $id)
     {
         $brand = Brand::find($id);
-        $brand->update($request->all());
+        // $brand->update($request->all());
+        $logo = "";
+        $request->validate([
+            "name" => "unique:brands,name," . $id
+        ]);
+        if ($request->logo != "") {
+            $image = $request->file("logo")->store("public/brand_logo");
+            $logo = Storage::url($image);
+            $brand->update([
+                "name" => $request->name,
+                "logo" => $logo,
+                "description" => $request->description
+            ]);
+        } else {
+            $brand->update([
+                "name" => $request->name,
+                "description" => $request->description
+            ]);
+        }
         return redirect()->route('admin.brands.index');
     }
 
