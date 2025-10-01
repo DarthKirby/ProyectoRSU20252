@@ -30,7 +30,7 @@
                         <td>{{ $brand->description }}</td>
                         <td>{{ $brand->created_at }}</td>
                         <td>{{ $brand->updated_at }}</td>
-                        <td><!--<a href="{{ route('admin.brands.edit', $brand) }}" class="btn btn-warning btn-sm btn-editar"><i class="fas fa-edit"></i></a></td>-->
+                        <td>
                         <button class="btn btn-warning btn-sm btnEditar" id={{ $brand->id }}><i class="fas fa-pen"></i></button>
                         <td>
                             <form action="{{ route('admin.brands.destroy', $brand) }}" method="POST" class="frmDelete">
@@ -40,7 +40,6 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
-
                         </td>
                     </tr>
                     @endforeach
@@ -93,6 +92,28 @@
                     $('#modal .modal-body').html(response);
                     $('#modal .modal-title').html("Nueva marca");
                     $('#modal').modal('show');
+                    $('#modal form').on('submit', function(e){
+                        e.preventDefault();
+                        var form = $(this);
+                        var formData = new FormData(form);
+                        $.ajax({
+                            "url": form.attr('action'),
+                            "type": form.attr('method'),
+                            "data": formData,
+                            "processData": false,
+                            "contentType": false,
+                            success: function(response){
+                                $('#modal').modal('hide');
+                                refreshTable();
+                                Swal.fire({
+                                    title: "Proceso exitoso!",
+                                    text: response.message,
+                                    icon: "success",
+                                    draggable: true
+                                });
+                            }
+                        });
+                    });
                 }
             });
         });
@@ -112,17 +133,53 @@
 
         $(document).ready(function() {
             $('#table').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                "ajax":"{{ route('admin.brands.index') }}",
+                "columns": [
+                    { 
+                        "data":"logo",
+                        "orderable": false,
+                        "searchable": false
+                    },
+                    {
+                        "data":"name",
+                    },
+                    {
+                        "data":"description",
+                    },
+                    {
+                        "data":"created_at",
+                    },
+                    {
+                        "data":"updated_at",
+                    },
+                    {
+                        "data":"edit",
+                        "orderable": false,
+                        "searchable": false
+                    },
+                    {
+                        "data":"delete",
+                        "orderable": false,
+                        "searchable": false
+                    }
+                ],
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 }
             });
         });
+
+        function refreshTable() {
+            var table = $('#table').DataTable();
+            table.ajax.reload(null, false);
+        }
+
     </script>
     @if (session('action') != null)
         <script>
             Swal.fire({
                 title: "Proceso exitoso!",
-                text: '{{ session("action") }}',
+                text: '{{ session('action') }}',
                 icon: "success",
                 draggable: true
             });

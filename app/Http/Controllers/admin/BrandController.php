@@ -6,16 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class BrandController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $brands = Brand::all();
-        return view('admin.brands.index', compact('brands'));
+        if ($request->ajax()) {
+            return DataTables::of($brands)
+                ->addColumn("logo", function($brand){
+                    return '<img src="'. ($brand->logo == '' ? asset('storage/brand_logo/no-image-icon-6.png') : asset($brand->logo)) .'" width="70px" height="50px" alt="{{ $brand->name }}">';
+                })
+                ->addColumn("edit", function ($brand){
+                    return '<button class="btn btn-warning btn-sm btnEditar" id="'.$brand->id.'"><i class="fas fa-pen"></i></button>';
+                })
+                ->addColumn("delete", function ($brand){
+                    return '<form action="'.route('admin.brands.destroy', $brand).'" method="POST" class="frmDelete">'.csrf_field().method_field('DELETE').'<button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></form>';
+                })
+                ->rawColumns(['logo','edit','delete'])
+                ->make(true);
+        } else {
+            return view('admin.brands.index', compact('brands'));
+        }
     }
 
     /**
@@ -31,21 +47,24 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        // Brand::create($request->all());
-        $logo = "";
-        $request->validate([
-            "name" => "unique:brands"
-        ]);
-        if ($request->logo != "") {
-            $image = $request->file("logo")->store("public/brand_logo");
-            $logo = Storage::url($image);
+        try {
+            $logo = "";
+            $request->validate([
+                "name" => "unique:brands"
+            ]);
+            if ($request->logo != "") {
+                $image = $request->file("logo")->store("public/brand_logo");
+                $logo = Storage::url($image);
+            }
+            Brand::create([
+                "name" => $request->name,
+                "logo" => $logo,
+                "description" => $request->description
+            ]);
+            return response()->json(["message" => "Marca registrada correctamente"], 200);
+        } catch (\Throwable $th) {
+            return response()->json(["message" => "Error en el registro"], 500);
         }
-        Brand::create([
-            "name" => $request->name,
-            "logo" => $logo,
-            "description" => $request->description
-        ]);
-        return redirect()->route('admin.brands.index')->with('action', 'Marca registrada');
     }
 
     /**
