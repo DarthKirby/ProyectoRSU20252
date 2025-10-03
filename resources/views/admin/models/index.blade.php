@@ -3,8 +3,8 @@
 @section('title', 'Proyecto RSU')
 
 @section('content_header')
-<button class="btn btn-success float-right" id="btnRegistrar"><i class="fas fa-plus"></i>Nueva Marca</button>
-<h1>Lista de Marcas</h1>
+<button class="btn btn-success float-right" id="btnRegistrar"><i class="fas fa-plus"></i>Nuevo Modelo</button>
+<h1>Lista de Modelos</h1>
 @stop
 
 @section('content')
@@ -13,8 +13,8 @@
             <table class="table table-striped" id="table">
                 <thead>
                     <tr>
-                        <th>Logo</th>
-                        <th>Nombre</th>
+                        <th>Modelo</th>
+                        <th>Marca</th>
                         <th>Descripción</th>
                         <th>Fecha Creación</th>
                         <th>Fecha Actualización</th>
@@ -23,17 +23,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($brands as $brand)
+                    @foreach ($models as $model)
                     <tr>
-                        <td><img src="{{ asset($brand->logo == '' ? asset('storage/brand_logo/no-image-icon-6.png') : $brand->logo) }}" width="70px" height="50px" alt="{{ $brand->name }}"></td>
-                        <td>{{ $brand->name }}</td>
-                        <td>{{ $brand->description }}</td>
-                        <td>{{ $brand->created_at }}</td>
-                        <td>{{ $brand->updated_at }}</td>
+                        <td>{{ $model->name }}</td>
+                        <td>{{ $model->brandname }}</td>
+                        <td>{{ $model->description }}</td>
+                        <td>{{ $model->created_at }}</td>
+                        <td>{{ $model->updated_at }}</td>
                         <td>
-                        <button class="btn btn-warning btn-sm btnEditar" id={{ $brand->id }}><i class="fas fa-pen"></i></button>
+                        <button class="btn btn-warning btn-sm btnEditar" id={{ $model->id }}><i class="fas fa-pen"></i></button>
                         <td>
-                            <form action="{{ route('admin.brands.destroy', $brand) }}" method="POST" class="frmDelete">
+                            <form action="{{ route('admin.models.destroy', $model) }}" method="POST" class="frmDelete">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">
@@ -52,7 +52,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Formulario de marcas</h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Formulario de modelos</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -107,7 +107,7 @@
         
         $('#btnRegistrar').click(function(){
             $.ajax({
-                url: "{{ route('admin.brands.create') }}",
+                url: "{{ route('admin.models.create') }}",
                 type: "GET",
                 success: function(response){
                     $('#modal .modal-body').html(response);
@@ -177,15 +177,13 @@
 
         $(document).ready(function() {
             $('#table').DataTable({
-                "ajax":"{{ route('admin.brands.index') }}",
+                "ajax":"{{ route('admin.models.index') }}",
                 "columns": [
-                    { 
-                        "data":"logo",
-                        "orderable": false,
-                        "searchable": false
-                    },
                     {
                         "data":"name",
+                    },
+                    {
+                        "data":"brandname",
                     },
                     {
                         "data":"description",
@@ -219,16 +217,6 @@
         }
 
     </script>
-    @if (session('action') != null)
-        <script>
-            Swal.fire({
-                title: "Proceso exitoso!",
-                text: '{{ session('action') }}',
-                icon: "success",
-                draggable: true
-            });
-        </script>
-    @endif
 @endsection
 
 @section('css')

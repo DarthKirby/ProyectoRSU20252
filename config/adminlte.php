@@ -331,7 +331,7 @@ return [
         ],
         [
             'text' => 'Modelos',
-            'url' => 'admin/settings',
+            'route' => 'admin.models.index',
             'icon' => 'fas fa-trailer',
         ],
         [
