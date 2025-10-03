@@ -67,8 +67,9 @@
 
 @section('js')
     <script>
-        $('.frmDelete').submit(function(e) {
+        $(document).on('submit', '.frmDelete', function(e) {
             e.preventDefault();
+            var form = $(this);
             Swal.fire({
             title: "Estás seguro de eliminar?",
             text: 'Esto no se puede deshacer',
